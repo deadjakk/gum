@@ -17,6 +17,7 @@ package spin
 
 import (
 	"os/exec"
+    "fmt"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,17 +27,25 @@ type model struct {
 	spinner spinner.Model
 	title   string
 	command []string
+    display bool
 }
 
 type finishCommandMsg struct{ output string }
 
-func commandStart(command []string) tea.Cmd {
+func commandStart(command []string, display bool) tea.Cmd {
 	return func() tea.Msg {
 		var args []string
 		if len(command) > 1 {
 			args = command[1:]
 		}
-		out, _ := exec.Command(command[0], args...).Output()
+		out, err := exec.Command(command[0], args...).Output()
+        
+        if display {
+            if err != nil {
+                fmt.Println(err.Error())
+            }
+            fmt.Print(string(out))
+        }
 		return finishCommandMsg{output: string(out)}
 	}
 }
@@ -44,9 +53,10 @@ func commandStart(command []string) tea.Cmd {
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		m.spinner.Tick,
-		commandStart(m.command),
+		commandStart(m.command, m.display),
 	)
 }
+
 func (m model) View() string { return m.spinner.View() + " " + m.title }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

@@ -11,12 +11,13 @@ import (
 // https://github.com/charmbracelet/bubbles/spinner
 func (o Options) Run() error {
 	s := spinner.New()
-	s.Style = o.SpinnerStyle.ToLipgloss()
+	s.Style   = o.SpinnerStyle.ToLipgloss()
 	s.Spinner = spinnerMap[o.Spinner]
 	m := model{
 		spinner: s,
 		title:   o.TitleStyle.ToLipgloss().Render(o.Title),
 		command: o.Command,
+        display: o.Display,
 	}
 	p := tea.NewProgram(m)
 	return p.Start()
