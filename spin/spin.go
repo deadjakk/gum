@@ -18,6 +18,7 @@ package spin
 import (
 	"os/exec"
     "fmt"
+    "os"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -38,14 +39,17 @@ func commandStart(command []string, display bool) tea.Cmd {
 		if len(command) > 1 {
 			args = command[1:]
 		}
-		out, err := exec.Command(command[0], args...).Output()
-        
+		cmd := exec.Command(command[0], args...)
         if display {
-            if err != nil {
+            cmd.Stdout = os.Stdout
+            cmd.Stderr = os.Stderr
+            err := cmd.Run()
+            if err != nil{
                 fmt.Println(err.Error())
             }
-            fmt.Print(string(out))
-        }
+            return finishCommandMsg{output: ""}
+        } 
+        out, _ := cmd.Output()
 		return finishCommandMsg{output: string(out)}
 	}
 }
